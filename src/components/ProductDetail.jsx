@@ -7,7 +7,7 @@ import { fetchProductById } from "../api/productsApi";
 import LazyImage from "./LazyImage";
 import Loading from "./Loading";
 import ErrorState from "./ErrorState";
-import { convertToINR, formatINR } from "../utils/currency";
+import { formatINR } from "../utils/currency";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -76,7 +76,7 @@ export default function ProductDetail() {
           <p className="detail-description">{product.description}</p>
 
           <div className="detail-price">
-            <strong>{formatINR(convertToINR(product.price))}</strong>
+            <strong>{formatINR(product.price)}</strong>
             <span>Indian Rupee price</span>
           </div>
 

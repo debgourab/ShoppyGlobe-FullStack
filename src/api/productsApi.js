@@ -1,16 +1,21 @@
-// Fake Store API is requested through the Vite development proxy so the browser does not
-// make a cross-origin request directly to the third-party API.
-const FAKE_STORE_API = "/fakestoreapi";
+import { API_URL } from "./apiClient";
+
+// Use the Express backend proxy in both development and production.
+const FAKE_STORE_API = `${API_URL}/fakestore`;
 
 function normalizeProduct(product) {
-  // Fake Store API prices are USD. The UI converts them to INR in currency.js.
+  const id = product.id ?? product.externalId;
+  const rating = typeof product.rating === "number" ? product.rating : Number(product?.rating?.rate || 0);
+  const ratingCount = product.ratingCount ?? product?.rating?.count ?? 0;
+
   return {
     ...product,
+    id,
     price: Number(product.price),
     image: product.image,
     thumbnail: product.image,
-    rating: Number(product?.rating?.rate || 0),
-    ratingCount: Number(product?.rating?.count || 0),
+    rating,
+    ratingCount: Number(ratingCount),
     stock: Number(product.stock || 10)
   };
 }
