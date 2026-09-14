@@ -2,6 +2,13 @@
   "name": "shoppyglobe-ecommerce",
   "private": true,
   "version": "1.0.0",
+  "description": "Full-stack ShoppyGlobe e-commerce frontend built with React, Redux Toolkit and Vite.",
+  "author": "Deb Gourab Biswas",
+  "homepage": "https://github.com/debgourab/ShoppyGlobe-FullStack",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/debgourab/ShoppyGlobe-FullStack.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
