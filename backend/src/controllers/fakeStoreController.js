@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import { fallbackProducts } from "../data/fallbackProducts.js";
 import { FAKE_STORE_API_URL, fetchFakeStoreProduct, normalizeExternalProduct } from "../services/fakeStoreService.js";
 
 async function cacheProducts(products) {
@@ -38,13 +39,18 @@ export async function getFakeStoreProducts(req, res, next) {
 
       if (response.ok && Array.isArray(data)) {
         const products = data.map(normalizeExternalProduct);
-        await cacheProducts(products);
+
+        try {
+          await cacheProducts(products);
+        } catch (cacheError) {
+          console.warn("Could not cache Fake Store products in MongoDB.", cacheError.message);
+        }
+
         res.set("X-Product-Source", "fakestoreapi");
         return res.status(200).json(products);
       }
     } catch (upstreamError) {
-      // Continue to the MongoDB fallback below.
-      console.warn("Fake Store API unavailable; using MongoDB cache.", upstreamError.message);
+      console.warn("Fake Store API unavailable; checking MongoDB cache.", upstreamError.message);
     }
 
     const cachedProducts = await getCachedProducts();
@@ -53,9 +59,16 @@ export async function getFakeStoreProducts(req, res, next) {
       return res.status(200).json(cachedProducts);
     }
 
-    return res.status(503).json({
-      message: "Fake Store API is unavailable and no cached products are available yet."
-    });
+    // Last-resort built-in catalogue. This keeps the deployed storefront usable
+    // even when Fake Store API blocks cloud hosting before MongoDB has a cache.
+    try {
+      await cacheProducts(fallbackProducts);
+    } catch (seedError) {
+      console.warn("Could not seed fallback products in MongoDB.", seedError.message);
+    }
+
+    res.set("X-Product-Source", "bundled-fallback");
+    return res.status(200).json(fallbackProducts);
   } catch (error) {
     next(error);
   }
@@ -66,11 +79,15 @@ export async function getFakeStoreProduct(req, res, next) {
     try {
       const product = await fetchFakeStoreProduct(req.params.id);
 
-      await Product.findOneAndUpdate(
-        { externalId: product.externalId },
-        { $set: product },
-        { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
-      );
+      try {
+        await Product.findOneAndUpdate(
+          { externalId: product.externalId },
+          { $set: product },
+          { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+        );
+      } catch (cacheError) {
+        console.warn("Could not cache Fake Store product in MongoDB.", cacheError.message);
+      }
 
       res.set("X-Product-Source", "fakestoreapi");
       return res.status(200).json(product);
@@ -82,6 +99,18 @@ export async function getFakeStoreProduct(req, res, next) {
         if (cachedProduct) {
           res.set("X-Product-Source", "mongodb-cache");
           return res.status(200).json(cachedProduct);
+        }
+
+        const fallbackProduct = fallbackProducts.find((product) => product.externalId === externalId);
+        if (fallbackProduct) {
+          try {
+            await cacheProducts([fallbackProduct]);
+          } catch (seedError) {
+            console.warn("Could not cache fallback product in MongoDB.", seedError.message);
+          }
+
+          res.set("X-Product-Source", "bundled-fallback");
+          return res.status(200).json(fallbackProduct);
         }
       }
 
