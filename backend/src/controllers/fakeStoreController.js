@@ -18,9 +18,35 @@ async function cacheProducts(products) {
 }
 
 async function getCachedProducts() {
-  return Product.find({ externalId: { $exists: true, $ne: null } })
+  const products = await Product.find({ externalId: { $exists: true, $ne: null } })
     .sort({ externalId: 1 })
     .lean();
+
+  // Earlier fallback data used generated SVG placeholders. Replace those old
+  // cached placeholder images with the current real fallback product photos.
+  const fallbackById = new Map(fallbackProducts.map((product) => [product.externalId, product]));
+  const replacements = [];
+
+  for (const product of products) {
+    const fallback = fallbackById.get(product.externalId);
+    const isOldPlaceholder = String(product.image || "").startsWith("data:image/svg+xml");
+
+    if (fallback && isOldPlaceholder) {
+      product.image = fallback.image;
+      product.thumbnail = fallback.thumbnail;
+      replacements.push(fallback);
+    }
+  }
+
+  if (replacements.length > 0) {
+    try {
+      await cacheProducts(replacements);
+    } catch (cacheError) {
+      console.warn("Could not refresh cached fallback product images.", cacheError.message);
+    }
+  }
+
+  return products;
 }
 
 export async function getFakeStoreProducts(req, res, next) {
@@ -97,6 +123,20 @@ export async function getFakeStoreProduct(req, res, next) {
       if (Number.isFinite(externalId)) {
         const cachedProduct = await Product.findOne({ externalId }).lean();
         if (cachedProduct) {
+          const fallbackProduct = fallbackProducts.find((product) => product.externalId === externalId);
+          const isOldPlaceholder = String(cachedProduct.image || "").startsWith("data:image/svg+xml");
+
+          if (fallbackProduct && isOldPlaceholder) {
+            cachedProduct.image = fallbackProduct.image;
+            cachedProduct.thumbnail = fallbackProduct.thumbnail;
+
+            try {
+              await cacheProducts([fallbackProduct]);
+            } catch (cacheError) {
+              console.warn("Could not refresh cached fallback product image.", cacheError.message);
+            }
+          }
+
           res.set("X-Product-Source", "mongodb-cache");
           return res.status(200).json(cachedProduct);
         }
