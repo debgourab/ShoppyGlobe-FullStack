@@ -7,6 +7,7 @@ export async function connectDatabase() {
     throw new Error("MONGODB_URI is not configured. Add it to backend/.env.");
   }
 
-  await mongoose.connect(uri);
-  console.log("MongoDB connected");
+  const connection = await mongoose.connect(uri);
+  console.log(`MongoDB connected: ${connection.connection.name}`);
+  return connection;
 }
