@@ -1,6 +1,9 @@
-// Use the Vite /api proxy in development. This avoids browser CORS/network issues and
-// keeps the same frontend code usable with a deployed backend via VITE_API_URL.
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+// In development always use Vite's /api proxy. This avoids CORS issues and keeps
+// the frontend working even when the local Express backend is not running.
+// In production Netlify uses VITE_API_URL to reach the deployed Render backend.
+const API_URL = import.meta.env.DEV
+  ? "/api"
+  : import.meta.env.VITE_API_URL || "/api";
 
 export async function apiRequest(path, options = {}) {
   const token = localStorage.getItem("shoppyglobe_token");
@@ -17,7 +20,7 @@ export async function apiRequest(path, options = {}) {
     response = await fetch(`${API_URL}${path}`, { ...options, headers });
   } catch (error) {
     const networkError = new Error(
-      "Cannot reach the backend API. Make sure MongoDB and the backend server are running on port 5000."
+      "Cannot reach the backend API. Check your network connection and backend configuration."
     );
     networkError.cause = error;
     throw networkError;
