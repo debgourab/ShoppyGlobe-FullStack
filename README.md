@@ -30,9 +30,9 @@ GitHub Repository: https://github.com/debgourab/ShoppyGlobe-FullStack
 
 ## Main Features
 
-- Responsive e-commerce UI
-- Product catalogue with fallback support
-- Product search
+- Responsive professional e-commerce UI
+- Product catalogue with API, MongoDB cache, and bundled fallback support
+- Product search and category filtering
 - Product details
 - User registration and login
 - JWT-based authentication
@@ -44,6 +44,7 @@ GitHub Repository: https://github.com/debgourab/ShoppyGlobe-FullStack
 - Centralized API error handling
 - Netlify SPA routing
 - Render-ready backend
+- Resilient local-development API proxy
 
 ## Project Structure
 
@@ -82,32 +83,22 @@ ShoppyGlobe-FullStack/
 
 ## Local Setup
 
-### 1. Clone the repository
+### Quick frontend-only setup
+
+The development server now proxies `/api` requests to the deployed Render backend by default. This means you can run the frontend locally without starting the Express backend.
 
 ```bash
 git clone https://github.com/debgourab/ShoppyGlobe-FullStack.git
 cd ShoppyGlobe-FullStack
-```
-
-### 2. Install frontend dependencies
-
-```bash
 npm install
-```
-
-Create a frontend `.env` file:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-Start the frontend:
-
-```bash
 npm run dev
 ```
 
-### 3. Install backend dependencies
+Open the localhost URL printed by Vite. No frontend `.env` file is required for this default workflow.
+
+### Optional: develop against the backend locally
+
+Install backend dependencies:
 
 ```bash
 cd backend
@@ -118,10 +109,10 @@ Create `backend/.env` from `backend/.env.example` and configure:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/shoppyglobe
+MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=replace_with_a_long_random_secret
 JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:4000,http://localhost:4001
 ADMIN_EMAIL=admin@shoppyglobe.com
 ADMIN_PASSWORD=replace_with_a_strong_password
 ```
@@ -131,6 +122,14 @@ Start the backend:
 ```bash
 npm run dev
 ```
+
+Then create `.env.local` in the project root:
+
+```env
+VITE_DEV_API_PROXY_TARGET=http://localhost:5000
+```
+
+Restart the Vite development server after changing `.env.local`.
 
 ## API Endpoints
 
@@ -169,7 +168,7 @@ DELETE /api/cart
 
 ## Product Source and Fallback
 
-The storefront first attempts to load products through the backend from Fake Store API. When that external service is unavailable, the backend can use cached MongoDB products and a bundled fallback catalogue so the deployed storefront remains usable.
+The storefront first attempts to load products through the backend from Fake Store API. When that external service is unavailable, the backend can use cached MongoDB products and a bundled fallback catalogue so the storefront remains usable.
 
 ## Deployment
 
@@ -205,7 +204,7 @@ Publish Directory: dist
 Required Netlify environment variable:
 
 ```env
-VITE_API_URL=https://your-render-service.onrender.com/api
+VITE_API_URL=https://shoppyglobe-fullstack-nmb6.onrender.com/api
 ```
 
 The included `netlify.toml` handles SPA route refreshes.
