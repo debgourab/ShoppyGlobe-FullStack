@@ -52,28 +52,10 @@ GitHub Repository: https://github.com/debgourab/ShoppyGlobe-FullStack
 ShoppyGlobe-FullStack/
 ├── backend/
 │   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── data/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── seed/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── app.js
-│   │   └── server.js
 │   ├── .env.example
 │   └── package.json
 ├── public/
 ├── src/
-│   ├── api/
-│   ├── components/
-│   ├── hooks/
-│   ├── pages/
-│   ├── store/
-│   ├── styles/
-│   └── utils/
 ├── .env.example
 ├── index.html
 ├── netlify.toml
@@ -85,7 +67,7 @@ ShoppyGlobe-FullStack/
 
 ### Quick frontend-only setup
 
-The development server now proxies `/api` requests to the deployed Render backend by default. This means you can run the frontend locally without starting the Express backend.
+The Vite development server proxies `/api` requests to the deployed Render backend by default, so you can run the frontend locally without starting Express.
 
 ```bash
 git clone https://github.com/debgourab/ShoppyGlobe-FullStack.git
@@ -94,9 +76,7 @@ npm install
 npm run dev
 ```
 
-Open the localhost URL printed by Vite. No frontend `.env` file is required for this default workflow.
-
-### Optional: develop against the backend locally
+### Run the backend locally
 
 Install backend dependencies:
 
@@ -105,16 +85,30 @@ cd backend
 npm install
 ```
 
-Create `backend/.env` from `backend/.env.example` and configure:
+Create a real local environment file from the safe template.
+
+Windows Command Prompt:
+
+```bash
+copy .env.example .env
+```
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit `backend/.env` and replace the placeholders with your own private values:
 
 ```env
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=replace_with_a_long_random_secret
+MONGODB_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_long_random_secret
 JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:4000,http://localhost:4001
+CLIENT_URL=http://localhost:4000,http://localhost:4001,http://localhost:5173,https://shoppyglobe-deb.netlify.app
 ADMIN_EMAIL=admin@shoppyglobe.com
-ADMIN_PASSWORD=replace_with_a_strong_password
+ADMIN_PASSWORD=your_strong_admin_password
 ```
 
 Start the backend:
@@ -123,13 +117,22 @@ Start the backend:
 npm run dev
 ```
 
-Then create `.env.local` in the project root:
+Test it in the browser:
+
+```text
+http://localhost:5000/api/health
+http://localhost:5000/api/fakestore/products
+```
+
+To make the local frontend use the local backend, create `.env.local` in the project root:
 
 ```env
 VITE_DEV_API_PROXY_TARGET=http://localhost:5000
 ```
 
-Restart the Vite development server after changing `.env.local`.
+Then restart the frontend development server.
+
+> `backend/.env` is intentionally ignored by Git and must never be pushed to GitHub. Only `backend/.env.example` belongs in the repository.
 
 ## API Endpoints
 
@@ -174,8 +177,6 @@ The storefront first attempts to load products through the backend from Fake Sto
 
 ### Backend — Render
 
-Use these settings:
-
 ```text
 Root Directory: backend
 Build Command: npm install
@@ -188,12 +189,10 @@ Required Render environment variables:
 MONGODB_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_long_random_secret
 JWT_EXPIRES_IN=7d
-CLIENT_URL=https://your-site.netlify.app
+CLIENT_URL=https://shoppyglobe-deb.netlify.app,http://localhost:4000,http://localhost:4001,http://localhost:5173
 ```
 
 ### Frontend — Netlify
-
-Use these settings:
 
 ```text
 Base Directory: leave blank
