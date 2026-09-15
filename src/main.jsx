@@ -6,6 +6,7 @@ import { store } from "./store";
 import { router } from "./App";
 import "./styles/index.css";
 import "./styles/pro.css";
+import "./styles/polish.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
