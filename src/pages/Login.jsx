@@ -32,16 +32,34 @@ export default function Login() {
 
   return (
     <div className="container page-container auth-page">
-      <form className="auth-card" onSubmit={submit}>
-        <p className="eyebrow">ShoppyGlobe account</p>
-        <h1>Welcome back</h1>
-        <p className="auth-copy">Login to access your protected cart and continue shopping.</p>
-        {error && <div className="auth-error">{error}</div>}
-        <label>Email<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" /></label>
-        <label>Password<input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Minimum 8 characters" /></label>
-        <button className="primary-btn wide-btn" disabled={status === "loading"}>{status === "loading" ? "Logging in..." : "Login"}</button>
-        <p className="auth-footer">New here? <Link to="/register">Create an account</Link></p>
-      </form>
+      <section className="auth-shell">
+        <aside className="auth-aside">
+          <div className="brand-mini">ShoppyGlobe</div>
+          <div className="auth-aside-copy">
+            <p className="eyebrow">Welcome back</p>
+            <h2>Pick up exactly where you left off.</h2>
+            <p>Sign in to access your secure cart, continue shopping and keep your account experience synced.</p>
+            <div className="auth-benefits">
+              <div className="auth-benefit"><span className="auth-check">✓</span><span>Persistent cart stored securely</span></div>
+              <div className="auth-benefit"><span className="auth-check">✓</span><span>Protected account access</span></div>
+              <div className="auth-benefit"><span className="auth-check">✓</span><span>Fast, seamless checkout flow</span></div>
+            </div>
+          </div>
+        </aside>
+
+        <div className="auth-form-wrap">
+          <form className="auth-card" onSubmit={submit}>
+            <p className="eyebrow">Account access</p>
+            <h1>Welcome back</h1>
+            <p className="auth-copy">Enter your details to continue shopping securely.</p>
+            {error && <div className="auth-error">{error}</div>}
+            <label>Email<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" /></label>
+            <label>Password<input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Enter your password" /></label>
+            <button className="primary-btn wide-btn" disabled={status === "loading"}>{status === "loading" ? "Logging in..." : "Login securely"}</button>
+            <p className="auth-footer">New to ShoppyGlobe? <Link to="/register">Create an account</Link></p>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }
