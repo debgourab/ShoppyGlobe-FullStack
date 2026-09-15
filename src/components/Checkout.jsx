@@ -35,17 +35,16 @@ export default function Checkout() {
     event.preventDefault();
     setSubmitted(true);
     dispatch(clearCartRemote());
-
     setTimeout(() => navigate("/", { replace: true }), 1600);
   }
 
   if (submitted) {
-  return (
+    return (
       <div className="container page-container">
         <section className="success-card">
           <div className="success-icon">✓</div>
-          <h1>Order placed</h1>
-          <p>Your order has been received successfully. Redirecting you to the home page...</p>
+          <h1>Order placed successfully</h1>
+          <p>Your order has been received. You’ll be redirected to the storefront in a moment.</p>
         </section>
       </div>
     );
@@ -56,28 +55,30 @@ export default function Checkout() {
       <div className="page-title-row">
         <div>
           <p className="eyebrow">Secure checkout</p>
-          <h1>Checkout</h1>
+          <h1>Complete your order</h1>
         </div>
       </div>
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
-          <h2>Your details</h2>
+          <h2>Delivery information</h2>
+          <p className="auth-copy">Enter the details we need to prepare your order.</p>
 
           <div className="form-grid">
             <label>Full name<input required name="name" value={form.name} onChange={handleChange} placeholder="Deb Gourab Biswas" /></label>
-            <label>Email address<input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="debgourab@gmail.com" /></label>
-            <label>Phone number<input required name="phone" value={form.phone} onChange={handleChange} placeholder="+91 1234567890" /></label>
+            <label>Email address<input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" /></label>
+            <label>Phone number<input required name="phone" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210" /></label>
             <label>City<input required name="city" value={form.city} onChange={handleChange} placeholder="Kolkata" /></label>
-            <label className="full-field">Address<input required name="address" value={form.address} onChange={handleChange} placeholder="Street and house number" /></label>
+            <label className="full-field">Delivery address<input required name="address" value={form.address} onChange={handleChange} placeholder="Street, building and area" /></label>
             <label>Postal code<input required name="postalCode" value={form.postalCode} onChange={handleChange} placeholder="700001" /></label>
           </div>
 
-          <button className="primary-btn wide-btn" type="submit">Place Order</button>
+          <button className="primary-btn wide-btn" type="submit">Place order securely</button>
+          <div className="secure-checkout-note"><span>✓</span><span>Your checkout is protected by your authenticated account session.</span></div>
         </form>
 
         <aside className="summary-card">
-          <h2>Your items</h2>
+          <h2>Your order</h2>
           {items.map((item) => (
             <div className="checkout-item" key={item.id}>
               <span>{item.title} × {item.quantity}</span>
@@ -88,6 +89,7 @@ export default function Checkout() {
           <div className="summary-row"><span>Subtotal</span><b>{formatINR(subtotal)}</b></div>
           <div className="summary-row"><span>Shipping</span><b>{shipping === 0 ? "FREE" : formatINR(shipping)}</b></div>
           <div className="summary-row total-row"><span>Total</span><b>{formatINR(total)}</b></div>
+          <div className="summary-note">No payment details are stored in this portfolio demo.</div>
         </aside>
       </div>
     </div>
