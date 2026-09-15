@@ -32,16 +32,11 @@ export default function ProductDetail() {
       } catch (err) {
         if (err.name === "AbortError") return;
         setStatus("error");
-        setError(
-          err.message === "PRODUCT_NOT_FOUND"
-            ? "The requested product does not exist."
-            : err.message || "Unable to load product details."
-        );
+        setError(err.message === "PRODUCT_NOT_FOUND" ? "The requested product does not exist." : err.message || "Unable to load product details.");
       }
     }
 
     loadProduct();
-
     return () => controller.abort();
   }, [productId]);
 
@@ -51,16 +46,19 @@ export default function ProductDetail() {
     return (
       <div className="container page-container">
         <ErrorState message={error} />
-        <div className="center-link">
-          <Link to="/">← Back to products</Link>
-        </div>
+        <div className="center-link"><Link to="/">← Back to products</Link></div>
       </div>
     );
   }
 
+  function handleAdd() {
+    if (isAuthenticated) dispatch(addToCartAsync({ productId: product.id }));
+    else navigate(`/login?redirect=/products/${product.id}`);
+  }
+
   return (
     <div className="container page-container">
-      <Link className="back-link" to="/">← Back to products</Link>
+      <Link className="back-link" to="/">← Back to collection</Link>
 
       <section className="detail-card">
         <div className="detail-image-wrap">
@@ -70,28 +68,29 @@ export default function ProductDetail() {
         <div className="detail-info">
           <p className="eyebrow">{product.category}</p>
           <h1>{product.title}</h1>
-          <div className="detail-rating">
-            ★ {product.rating.toFixed(1)} <span>•</span> {product.ratingCount} ratings
-          </div>
+          <div className="detail-rating">★ {product.rating.toFixed(1)} <span>•</span> {product.ratingCount} verified ratings</div>
           <p className="detail-description">{product.description}</p>
 
           <div className="detail-price">
             <strong>{formatINR(product.price)}</strong>
-            <span>Indian Rupee price</span>
+            <span>Inclusive of taxes</span>
           </div>
 
           <div className="detail-meta">
-            <div><span>Category</span><b>{product.category}</b></div>
+            <div><span>Availability</span><b>{product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}</b></div>
             <div><span>Product ID</span><b>SG-{product.id}</b></div>
-            <div><span>Ratings</span><b>{product.ratingCount}</b></div>
+            <div><span>Category</span><b>{product.category}</b></div>
+            <div><span>Customer ratings</span><b>{product.ratingCount}</b></div>
           </div>
 
-          <button
-            className="primary-btn wide-btn"
-            type="button"
-            onClick={() => isAuthenticated ? dispatch(addToCartAsync({ productId: product.id })) : navigate("/login?redirect=/")}
-          >
-            Add to Cart
+          <div className="detail-trust">
+            <div>Secure checkout</div>
+            <div>Easy returns</div>
+            <div>Fast dispatch</div>
+          </div>
+
+          <button className="primary-btn wide-btn" type="button" onClick={handleAdd} disabled={product.stock <= 0}>
+            {isAuthenticated ? "Add to cart" : "Login to add to cart"}
           </button>
         </div>
       </section>
